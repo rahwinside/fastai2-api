@@ -1,5 +1,4 @@
-# flask-rest-api-boilerplate
-Flask Python Restful API - MySQL Boilerplate
+# FastAI API Layer for Textbook Examples
 
 ## Install dependencies
 ```cmd 
