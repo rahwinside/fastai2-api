@@ -5,6 +5,11 @@ import os
 app = Flask(__name__, static_url_path='', static_folder='.')
 app.config['CORS_HEADERS'] = 'Content-Type'
 
+UPLOAD_FOLDER = 'infer_images'
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 # CORS section
 
 
@@ -20,7 +25,7 @@ def after_request_func(response):
 import error_handles
 
 # Add your API endpoints here
-from routes import users
+from routes import infer_cats
 # from routes import cars
 # ...
 
@@ -28,7 +33,7 @@ from routes import users
 @app.route('/')
 def get_endpoint_function():
     try:
-        res = "<h1 style='position: fixed; top: 50%;  left: 50%; transform: translate(-50%, -50%);'>FLASK API HOME</h1>"
+        res = "<h1 style='position: fixed; top: 50%;  left: 50%; transform: translate(-50%, -50%);'>FastAI API Layer</h1>"
         return res
 
     except Exception as e:

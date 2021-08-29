@@ -1,41 +1,35 @@
-import pymysql
 from app import app, forbidden
-from config import mysql
 from flask import jsonify, request
+from fastai.vision.all import *
+
+import os
+from flask import Flask, flash, request, redirect, url_for
+from werkzeug.utils import secure_filename
 
 
-@app.route('/users', methods=['POST', 'GET'])
-def insert_cars():
+@app.route('/cats-and-dogs', methods=['GET'])
+def infer_cats():
     try:
-        _form = request.form
-        _name = _form['name']
-        _email = _form['email']
 
-        if _name and _email and request.method == 'POST':
-            # insert record in database
-            conn = mysql.connect()
-            cursor = conn.cursor()
-            cursor.execute(
-                f"INSERT INTO users(name,email) VALUES({_name}, {_email})")
-            conn.commit()
-            cursor.close()
-            conn.close()
-            res = jsonify('success')
-            res.status_code = 200
-            return res
+        if request.method == 'GET':
+            # check if the post request has the file part
+            if 'image' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['image']
+            # if user does not select file, browser also
+            # submit a empty part without filename
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-        elif request.method == 'GET':
-            # Get record in database
-            _email = request.args["email"]
-            conn = mysql.connect()
-            cursor = conn.cursor()
-            cursor.execute(
-                f"SELECT * FROM `users` WHERE email='{_email}'")
-            res = cursor.fetchall()
-            cursor.close()
-            conn.close()
-            res.status_code = 200
-            return jsonify(res)
+                learn_inf = load_learner('models/cats_and_dogs.pkl')
+                res = learn_inf.predict(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                res.status_code = 200
+                return jsonify(res)
 
         else:
             return forbidden()
